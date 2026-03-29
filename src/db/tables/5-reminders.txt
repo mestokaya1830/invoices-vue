@@ -1,0 +1,51 @@
+
+CREATE TABLE IF NOT EXISTS reminders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+  date TEXT DEFAULT NULL,
+
+  invoice_id INTEGER NOT NULL, --//for foreign key
+  customer_id INTEGER NOT NULL, --//for foreign key
+  is_active INTEGER NOT NULL DEFAULT 1,
+
+  customer TEXT DEFAULT NULL,
+  invoice TEXT DEFAULT NULL,
+
+  level INTEGER NOT NULL DEFAULT 0,
+  sent_method TEXT DEFAULT NULL,
+  proof_type TEXT DEFAULT 'Zahlungserinnerung',
+
+  reminder_fee REAL NOT NULL DEFAULT 0,
+  late_interest REAL NOT NULL DEFAULT 0,
+
+  intro_text TEXT DEFAULT NULL,
+  warning_text TEXT DEFAULT NULL,
+  closing_text TEXT DEFAULT NULL,
+  payment_deadline TEXT DEFAULT NULL,
+
+  cancelled_at TEXT DEFAULT NULL,
+  cancelled_by INTEGER DEFAULT NULL,
+  cancellation_reason TEXT DEFAULT NULL,
+
+  created_at DATETIME DEFAULT (datetime('now')),
+  updated_at DATETIME DEFAULT (datetime('now')),
+
+  FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+
+
+
+-- indexes --
+
+CREATE INDEX IF NOT EXISTS idx_reminders_invoice_id ON reminders(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_reminders_is_cancelled ON reminders(is_cancelled);
+
+
+-- trigger --
+
+CREATE TRIGGER IF NOT EXISTS trg_reminders_updated_at
+AFTER UPDATE ON reminders
+BEGIN
+  UPDATE reminders SET updated_at = datetime('now') WHERE id = NEW.id;
+END;

@@ -1,0 +1,124 @@
+//get all tables--------------------------------------------------------------
+try {
+ const rows =  db.prepare(`SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;`).all()
+ console.log(rows)
+} catch (err) {
+  console.error(err.message)
+}
+
+//drop table-----------------------------------------------------------------
+try {
+  db.prepare('DROP TABLE orders').run()
+} catch (err) {
+  console.error(err.message)
+}
+
+//delete table-------------------------------------------------------------
+try {
+  db.prepare('DELETE FROM users').run() // veya DROP TABLE users için: 'DROP TABLE users'
+} catch (err) {
+  console.error(err.message)
+}
+
+//truncate table
+try {
+  db.prepare(`DELETE FROM users;`).run()
+  db.prepare(`DELETE FROM sqlite_sequence WHERE name = 'users';`).run()
+} catch (error) {
+  console.error(error)
+}
+
+//insert into table---------------------------------------------------------------------------
+try {
+  db.prepare('INSERT INTO users (email, password) VALUES (?, ?)').run('mesto@outlook.com', '909090')
+} catch (err) {
+  console.error(err.message)
+}
+
+//get table data--------------------------------------------------------------------------
+try {
+  const users = db.prepare('SELECT * FROM users').all()
+  console.log('Users:', users)
+} catch (err) {
+  console.error(err.message)
+}
+
+
+//get table data by email-------------------------------------------------------
+try {
+  const user = db.prepare('SELECT * FROM users WHERE email = ?').get('mesto@outlook.com')
+  console.log('User:', user)
+} catch (err) {
+  console.error(err.message)
+}
+
+
+//update table--------------------------------------------------------------------
+try {
+  const user = db.prepare('UPDATE users SET email = ? WHERE id = ?').run('mesto@outlook.com', 1)
+  console.log('User:', user)
+} catch (err) {
+  console.error(err.message)
+}
+
+
+//get table fields
+try {
+  const result = db.prepare(`PRAGMA table_info(invoices);`).all()
+  const fields = result.map(r => r.name)
+  console.log(fields)
+} catch (err) {
+  console.error(err.message)
+}
+
+//extract query-------------------------------------------------------------------
+try {
+  const result = db
+    .prepare(
+      `SELECT * 
+       FROM invoices 
+       WHERE CAST(json_extract(customer, '$.id') AS INTEGER) = ?;`
+    )
+    .all(4) // 1 → customer id
+  console.log(result)
+} catch (err) {
+  console.error(err.message)
+}
+
+-------------------------------------------------------------------------------------
+//add column
+try {
+  db.exec('ALTER TABLE customers ADD COLUMN column_name type_name;')
+} catch (err) {
+  console.error(err.message)
+}
+
+-------------------------------------------------------------------------------------
+//rename column
+try {
+  db.exec('ALTER TABLE customers RENAME COLUMN old_column_name TO new_column_name;')
+} catch (err) {
+  console.error(err.message)
+}
+
+-------------------------------------------------------------------------------------
+//drop column
+try {
+  db.exec('ALTER TABLE customers DROP COLUMN column_name')
+} catch (err) {
+  console.error(err.message)
+}
+
+//index list
+const indexes = db.prepare('PRAGMA index_list(customers);').all()
+console.log(indexes)
+
+//remove index
+db.exec(`
+  DROP INDEX IF EXISTS idx_customers_email;
+`)
+
+//create index
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_cutomers_is_active ON customers(is_active);
+`)

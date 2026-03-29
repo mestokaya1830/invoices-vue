@@ -1,0 +1,58 @@
+
+CREATE TABLE IF NOT EXISTS offers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+
+  date TEXT NOT NULL,
+  valid_until TEXT DEFAULT NULL,
+
+  customer TEXT NOT NULL DEFAULT '{}',
+
+  subject TEXT DEFAULT NULL,
+  currency TEXT NOT NULL DEFAULT 'EUR.de-DE',
+  payment_terms TEXT DEFAULT NULL,
+  delivery_terms TEXT DEFAULT NULL,
+  delivery_time TEXT DEFAULT NULL,
+
+  positions TEXT NOT NULL DEFAULT '[]',
+  net_total REAL NOT NULL DEFAULT 0,
+  vat_total REAL NOT NULL DEFAULT 0,
+  gross_total REAL NOT NULL DEFAULT 0,
+
+  status TEXT NOT NULL DEFAULT 'draft',
+  status_by TEXT DEFAULT NULL,
+  status_comments TEXT DEFAULT NULL,
+
+  is_active INTEGER NOT NULL DEFAULT 1,
+  is_legal INTEGER NOT NULL DEFAULT 0,
+
+  introduction_text TEXT DEFAULT NULL,
+  closing_text TEXT DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  internal_notes TEXT DEFAULT NULL,
+
+  cancelled_at TEXT DEFAULT NULL,
+  cancelled_by TEXT DEFAULT NULL,
+  cancellation_reason TEXT DEFAULT NULL,
+
+  created_at DATETIME DEFAULT (datetime('now')),
+  updated_at DATETIME DEFAULT (datetime('now')),
+
+  FOREIGN KEY(customer_id) REFERENCES customers(id) ON DELETE RESTRICT
+);
+
+
+-- indexes --
+
+CREATE INDEX IF NOT EXISTS idx_offers_customer_id ON offers(customer_id);
+CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status);
+CREATE INDEX IF NOT EXISTS idx_offers_date ON offers(date);
+
+
+-- trigger --
+
+CREATE TRIGGER IF NOT EXISTS trg_offers_updated_at
+AFTER UPDATE ON offers
+BEGIN
+  UPDATE offers SET updated_at = datetime('now') WHERE id = NEW.id;
+END;

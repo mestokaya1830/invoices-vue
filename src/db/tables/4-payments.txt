@@ -1,0 +1,51 @@
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL,
+
+  invoice_id INTEGER NOT NULL,
+  customer_id INTEGER NOT NULL,
+  is_active INTEGER DEFAULT 1,
+
+  customer TEXT DEFAULT NULL,
+  invoice TEXT DEFAULT NULL,
+
+  invoice TEXT NOT NULL DEFAULT '{}',
+  payment_amount REAL NOT NULL DEFAULT 0,
+  payment_method TEXT DEFAULT NULL,
+  payment_reference TEXT DEFAULT NULL,
+
+  counterparty_name TEXT DEFAULT NULL,
+  counterparty_iban TEXT DEFAULT NULL,
+  counterparty_bic TEXT DEFAULT NULL,
+  counterparty_bank TEXT DEFAULT NULL,
+
+  notes TEXT DEFAULT NULL,
+  file_name TEXT DEFAULT NULL,
+
+  cancelled_at TEXT DEFAULT NULL,
+  cancelled_by TEXT DEFAULT NULL,
+  cancellation_reason TEXT DEFAULT NULL,
+
+  created_at DATETIME DEFAULT (datetime('now')),
+  updated_at DATETIME DEFAULT (datetime('now')),
+
+  FOREIGN KEY(invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+  FOREIGN KEY(customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+
+
+-- indexes --
+
+CREATE INDEX IF NOT EXISTS idx_payments_invoice_id ON payments(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_payments_customer_id ON payments(customer_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payment_date ON payments(payment_date);
+
+
+--trigger --
+
+CREATE TRIGGER IF NOT EXISTS trg_payments_updated_at
+AFTER UPDATE ON payments
+BEGIN
+  UPDATE payments SET updated_at = datetime('now') WHERE id = NEW.id;
+END;

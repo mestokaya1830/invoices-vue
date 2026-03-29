@@ -1,0 +1,63 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  gender TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  password TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  phone TEXT DEFAULT NULL,
+  address TEXT DEFAULT NULL,
+  postal_code TEXT DEFAULT NULL,
+  city TEXT DEFAULT NULL,
+  state TEXT DEFAULT NULL,
+  country TEXT DEFAULT 'Deutschland',
+  website TEXT DEFAULT NULL,
+
+  company_name TEXT DEFAULT NULL,
+  company_details TEXT DEFAULT '{}',
+  company_signature TEXT DEFAULT NULL,
+  contact_person TEXT DEFAULT '{}',
+
+  tax_number TEXT DEFAULT NULL,
+  tax_office TEXT DEFAULT NULL,
+  vat_id TEXT DEFAULT NULL,
+  court_registration TEXT DEFAULT NULL,
+  court_location TEXT DEFAULT NULL,
+
+  datev_beraternummer TEXT DEFAULT '1000',  // Steuerberater'dan alınır
+  datev_mandantennummer TEXT DEFAULT '1',   // Genelde "1"
+  datev_skr TEXT DEFAULT '04',              // SKR04 veya SKR03
+
+  logo BLOB DEFAULT NULL,
+  image_type TEXT DEFAULT NULL,
+
+  bank_name TEXT DEFAULT NULL,
+  bic TEXT DEFAULT NULL,
+  iban TEXT DEFAULT NULL,
+  bank_account_holder TEXT DEFAULT NULL,
+  
+  created_at DATETIME DEFAULT (datetime('now')),
+  updated_at DATETIME DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+CREATE TRIGGER IF NOT EXISTS trg_users_updated_at
+AFTER UPDATE ON users
+BEGIN
+  UPDATE users SET updated_at = datetime('now') WHERE id = NEW.id;
+END;
+
+
+--tokens
+CREATE TABLE IF NOT EXISTS tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token TEXT UNIQUE NOT NULL,
+  user_id INTEGER NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT (datetime('now')),
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_tokens_user_id ON tokens(user_id);

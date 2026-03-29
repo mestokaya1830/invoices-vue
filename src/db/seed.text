@@ -1,0 +1,268 @@
+// ==========================
+// YARDIMCI FONKSİYONLAR
+// ==========================
+const randDate = (startYear = 2025, endYear = 2025) => {
+  const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+  const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+  return `${startYear}-${month}-${day}`;
+};
+
+const randQty = () => Math.floor(Math.random() * 9) + 1;
+const randPrice = () => Number((Math.random() * 200 + 20).toFixed(2));
+const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const randEmail = (name) => `${name.toLowerCase()}${Math.floor(Math.random() * 100)}@example.com`;
+const randPhone = () => `+49${Math.floor(1000000000 + Math.random() * 8999999999)}`;
+
+// ==========================
+// CUSTOMERS — tam uyumlu
+// ==========================
+const insertCustomer = db.prepare(`
+  INSERT INTO customers (
+    company_type, company_name, first_name, last_name, full_name,
+    email, phone, address, postal_code, city, country,
+    tax_number, vat_id, is_active, website
+  ) VALUES (
+    @company_type, @company_name, @first_name, @last_name, @full_name,
+    @email, @phone, @address, @postal_code, @city, @country,
+    @tax_number, @vat_id, @is_active, @website
+  )
+`);
+
+const firstNames = ['Anna','Lukas','Mia','Jonas','Lea','Paul','Sophie','Niklas','Klara','Felix'];
+const lastNames = ['Müller','Schmidt','Becker','Fischer','Weber','Wagner','Koch','Richter','Klein'];
+const cities = ['Berlin','Hamburg','München','Köln','Düsseldorf','Leipzig','Frankfurt','Stuttgart','Bremen'];
+const companies = ['Einzelunternehmen', 'GmbH', 'OHG', 'KG', 'GmbH_co_KG', 'Partg', 'Partgmbb', 'Partgmbh', 'Ug', 'Gbr'];
+const websites = ['example.com', 'demo.com', 'sample.org', 'test.net', 'mycompany.de', 'company.com', 'business.org', 'website.net', 'company.net', 'demo.org'];
+
+let customerList = [];
+
+for (let i = 1; i <= 30; i++) {
+  const first_name = rand(firstNames);
+  const last_name = rand(lastNames);
+  const full_name = `${first_name} ${last_name}`;
+  const postal_code = `${Math.floor(10000 + Math.random() * 89999)}`;
+  const street = `Musterstraße ${Math.floor(Math.random() * 80) + 1}`;
+
+  const tax_number = `DE${Math.floor(100000000 + Math.random() * 899999999)}`;
+  const vat_id = `DE${Math.floor(100000000 + Math.random() * 899999999)}`;
+
+  const customer = {
+    is_active: 1,
+    company_type: rand(companies),
+    company_name: `${rand(lastNames)} & Partner`,
+    first_name,
+    last_name,
+    full_name,
+    email: randEmail(first_name),
+    phone: randPhone(),
+    address: street,
+    postal_code,
+    city: rand(cities),
+    country: 'Deutschland',
+    tax_number,
+    vat_id,
+    website: rand(websites)
+  };
+
+  const info = insertCustomer.run(customer);
+  customer.id = info.lastInsertRowid;
+  customerList.push(customer);
+}
+
+// ==========================
+// INVOICES — tam uyumlu (senin tablon ile birebir)
+// ==========================
+const insertInvoice = db.prepare(`
+  INSERT INTO invoices (
+    customer_id,
+    customer,
+    is_active,
+    service_date,
+    date,
+    due_date,
+    currency,
+    payment_terms,
+    payment_conditions,
+    early_payment_discount,
+    early_payment_percentage,
+    early_payment_days,
+    is_small_company,
+    is_reverse_charge,
+    is_eu_delivery,
+    positions,
+    net_total,
+    vat_total,
+    gross_total,
+    payment_status,
+    cancelled_at,
+    cancelled_by,
+    cancellation_reason
+  ) VALUES (
+    @customer_id,
+    @customer,
+    1,
+    @service_date,
+    @date,
+    @due_date,
+    @currency,
+    @payment_terms,
+    @payment_conditions,
+    @early_payment_discount,
+    @early_payment_percentage,
+    @early_payment_days,
+    @is_small_company,
+    @is_reverse_charge,
+    @is_eu_delivery,
+    @positions,
+    @net_total,
+    @vat_total,
+    @gross_total,
+    'unpaid',
+    '',
+    '',
+    ''
+  )
+`);
+
+
+// ==========================
+// 100 INVOICE OLUŞTURMA
+// ==========================
+for (let i = 0; i < 100; i++) {
+  const customer = customerList[i % customerList.length];
+
+  const invoiceDate = randDate();
+  const serviceDate = randDate();
+  const payment_terms = 14;
+
+  const due_date = (() => {
+    const d = new Date(invoiceDate);
+    d.setDate(d.getDate() + payment_terms);
+    return d.toISOString().split("T")[0];
+  })();
+
+  const qty = randQty();
+  const price = randPrice();
+
+  const isSmallCompany = Math.random() < 0.2;
+  const vatRate = isSmallCompany ? 0 : 19;
+
+  const vat_unit = Number(((price * vatRate) / 100).toFixed(2));
+  const unit_total = Number((price + vat_unit).toFixed(2));
+
+  const positions = [
+    {
+      id: 1,
+      title: "Dienstleistung",
+      description: "Allgemeine Servicetätigkeit",
+      service_period_start: randDate(),
+      service_period_end: randDate(),
+      unit: "Stk",
+      quantity: qty,
+      price,
+      vat: vatRate,
+      vat_unit,
+      unit_total: qty * unit_total
+    }
+  ];
+
+  const net_total = qty * price;
+  const vat_total = qty * vat_unit;
+  const gross_total = qty * unit_total;
+
+  insertInvoice.run({
+    customer_id: customer.id,
+    customer: JSON.stringify(customer),
+    date: invoiceDate,
+    due_date,
+    service_date: serviceDate,
+    currency: "EUR.de-DE",
+    payment_terms,
+    payment_conditions: "Zahlbar innerhalb von 14 Tagen.",
+    early_payment_discount: 0,
+    early_payment_percentage: 2,
+    early_payment_days: 7,
+    is_small_company: isSmallCompany ? 1 : 0,
+    is_reverse_charge: 0,
+    is_eu_delivery: 0,
+    positions: JSON.stringify(positions),
+    net_total,
+    vat_total,
+    gross_total
+  });
+}
+
+console.log("✅ 30 Customer + 100 Invoice başarıyla oluşturuldu!");
+
+
+
+//user---------------------------------------------------
+
+try {
+  db.prepare(`
+INSERT INTO users (
+  gender, first_name, last_name, password, email, phone, 
+  address, postal_code, city, state, country, website,
+  company_name, company_details, company_signature, contact_person,
+  tax_number, tax_office, vat_id, court_registration, court_location,
+  bank_name, bic, iban, bank_account_holder
+) VALUES 
+(
+  'Herr',
+  'Markus',
+  'Schmidt',
+  '$2y$10$example_hashed_password_here',
+  'markus.schmidt@beispiel.de',
+  '+49 711 12345678',
+  'Königstraße 45',
+  '70173',
+  'Stuttgart',
+  'Baden-Württemberg',
+  'Deutschland',
+  'www.schmidt-consulting.de',
+  'Schmidt Consulting GmbH',
+  '{"gruendungsjahr": "2015", "mitarbeiter": "25", "branche": "IT-Beratung"}',
+  'Mit freundlichen Grüßen\nMarkus Schmidt\nGeschäftsführer',
+  '{"name": "Anna Müller", "position": "Assistentin", "telefon": "+49 711 12345679"}',
+  '12345/67890',
+  'Finanzamt Stuttgart I',
+  'DE123456789',
+  'HRB 12345',
+  'Stuttgart',
+  'Commerzbank Stuttgart',
+  'COBADEFFXXX',
+  'DE89370400440532013000',
+  'Schmidt Consulting GmbH'
+),
+(
+  'Frau',
+  'Julia',
+  'Weber',
+  '121212',
+  'admin@admin.de',
+  '+49 711 98765432',
+  'Rotebühlplatz 10',
+  '70178',
+  'Stuttgart',
+  'Baden-Württemberg',
+  'Deutschland',
+  'www.webdesign-bw.de',
+  'Weber Webdesign',
+  '{"gruendungsjahr": "2018", "mitarbeiter": "8", "branche": "Webdesign"}',
+  'Herzliche Grüße\nJulia Weber',
+  '{"name": "Thomas Klein", "position": "Projektleiter", "telefon": "+49 711 98765433"}',
+  '98765/43210',
+  'Finanzamt Stuttgart II',
+  'DE987654321',
+  NULL,
+  NULL,
+  'Sparkasse Stuttgart',
+  'SOLADES1STG',
+  'DE12600501017001234567',
+  'Julia Weber'
+)`).run();
+  
+  console.log('Veriler başarıyla eklendi!');
+} catch (error) {
+  console.log('Hata:', error);
+}
