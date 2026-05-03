@@ -217,12 +217,8 @@
 
 <script>
 import store from '../../store'
-import IbanComponent from '../../components/IbanComponent.vue'
 
 export default {
-  components: {
-    IbanComponent
-  },
   inject: ['formatInvoiceId', 'formatCustomerId', 'formatDate', 'formatCurrency'],
   data() {
     return {

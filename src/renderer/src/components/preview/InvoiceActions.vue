@@ -16,7 +16,6 @@
         Drucken
       </button>
 
-      <button class="btn btn-datev" @click="exportDatev">📊 DATEV Export</button>
       <router-link
         v-if="tableData.id !== 'preview' && tableData.is_active"
         :to="`/invoices/edit/${tableData.id}`"

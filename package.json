@@ -31,6 +31,7 @@
     "localforage": "^1.10.0",
     "material-icons": "^1.13.14",
     "nodemailer": "^7.0.6",
+    "sqlite3": "^6.0.1",
     "vue-router": "^4.5.1",
     "vuex": "^4.0.3",
     "vuex-persistedstate": "^4.1.0"
