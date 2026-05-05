@@ -30,7 +30,6 @@
         <i class="bi bi-arrow-up go-top-icon" aria-hidden="true"></i>
       </button>
     </footer>
-
   </div>
 </template>
 
@@ -331,3 +330,95 @@ export default {
   }
 }
 </script>
+
+<style>
+/* APP LAYOUTS */
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+.layouts {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  margin-top: 60px;
+  padding: 90px;
+  overflow-y: auto;
+}
+.btn-go-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: var(--color-white);
+  background: linear-gradient(180deg, #1f2937 0%, var(--color-green) 100%);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.btn-go-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+.go-top-icon {
+  font-size: var(--font-size-xl);
+}
+
+.page-title {
+  margin-bottom: 10px;
+  border-bottom: var(--border-sm);
+}
+/* TITLEBAR */
+.titlebar {
+  height: clamp(60px, 3vw, 80px);
+  background: linear-gradient(180deg, #1f2937 0%, #333 100%);
+  color: white;
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+.titlebar-title {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-left: 20px;
+}
+.window-controls button {
+  -webkit-app-region: no-drag;
+}
+.window-controls button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  margin: 0 5px;
+  width: 30px;
+  transition: background-color 0.3s ease;
+}
+.window-controls button:hover {
+  background-color: rgba(255, 255, 255, 0);
+}
+
+</style>
