@@ -176,6 +176,16 @@
 
       <InvoiceActions v-if="invoice" :tableData="invoice" :fileName="actionFileName" />
 
+      <section class="btn-container-left">
+        <router-link :to="`/reminders/create/${invoice.id}`" class="btn btn-reminder">
+          <i class="bi bi-bell-fill btn-icons" aria-hidden="true"></i> Mahnung erstellen
+        </router-link>
+        <button class="btn btn-datev" @click="exportDATEV">
+          <i class="bi bi-file-earmark-spreadsheet btn-icons" aria-hidden="true"></i>
+          <span>DATEV Export</span>
+        </button>
+      </section>
+
       <section v-if="payments && payments.length" class="report-table-container">
         <h4 class="mb-3">
           <i class="bi bi-cash-stack icons" aria-hidden="true"></i>Zahlungshistorie
@@ -209,12 +219,6 @@
         </table>
       </section>
 
-      <section>
-        <router-link :to="`/reminders/create/${invoice.id}`" class="btn btn-reminder">
-          <i class="bi bi-bell-fill icons" aria-hidden="true"></i> Mahnung erstellen
-        </router-link>
-      </section>
-
       <section v-if="reminders && reminders.length">
         <h4 class="mb-3">
           <i class="bi bi-exclamation-octagon-fill btn-reminder" aria-hidden="true"></i>Mahnungen
@@ -243,10 +247,6 @@
           </tbody>
         </table>
       </section>
-      <button @click="exportDATEV" class="btn btn-datev">
-        <i class="bi bi-file-earmark-spreadsheet btn-icons" aria-hidden="true"></i>
-        <span>DATEV Export</span>
-      </button>
     </section>
   </div>
 </template>

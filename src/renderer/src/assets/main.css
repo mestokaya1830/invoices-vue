@@ -70,6 +70,10 @@
   justify-content: flex-end;
   margin-top: var(--spacing-xl);
 }
+.btn-container-left {
+  display: flex;
+  margin-top: var(--spacing-xl);
+}
 
 .btn {
   display: flex;
@@ -108,6 +112,10 @@
 .btn-secondary {
   background-color: var(--color-white);
   color: var(--color-black-light);
+  border: var(--border-sm);
+}
+.btn-reminder {
+  background-color: var(--color-red);
   border: var(--border-sm);
 }
 .btn-edit {
@@ -297,6 +305,7 @@ textarea::placeholder {
 }
 .main-title {
   font-size: 24px;
+  padding-bottom: 10px;
 }
 .main-filter {
   display: flex;
@@ -1202,7 +1211,7 @@ input:checked + .slider:before {
 .intro-text {
   margin-bottom: var(--spacing-lg);
   line-height: 1.6;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
 }
 
 .btn-payment {
@@ -1441,7 +1450,7 @@ input:checked + .slider:before {
 .small-company {
   background: var(--color-red-light);
   border: 1px solid var(--color-red-light);
-  color: #856404;
+  color: var(--color-white);
 }
 
 /* REPORT STYLE------------------------------------------- */
